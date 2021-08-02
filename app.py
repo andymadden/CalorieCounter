@@ -6,6 +6,12 @@ from datetime import datetime, date
 
 app = Flask(__name__)
 
+conn = sqlite3.connect("data.sqlite3")
+c = conn.cursor()
+c.execute("CREATE TABLE IF NOT EXISTS meals (timestamp datetime, name text, calories int);")
+c.execute("CREATE TABLE IF NOT EXISTS weights (timestamp datetime, weight int);")
+conn.commit()
+
 @app.route("/")
 def index():
     return Response(open("index.html").read(), content_type="text/html")
@@ -29,7 +35,6 @@ def addMeal():
         return ""
     conn = sqlite3.connect("data.sqlite3")
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS meals (timestamp datetime, name text, calories int);")
     c.execute("INSERT INTO meals (timestamp, name, calories) VALUES (?, ?, ?);", (datetime.now().isoformat(), req_dict['name'], req_dict['calories']))
     conn.commit()
     return ""
@@ -39,7 +44,6 @@ def addWeight():
     req_dict = json.loads(request.data)
     conn = sqlite3.connect("data.sqlite3")
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS weights (timestamp datetime, weight int);")
     c.execute("INSERT INTO weights (timestamp, weight) VALUES (?, ?);", (datetime.now().isoformat(), req_dict['weight']))
     conn.commit()
     return ""
