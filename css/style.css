@@ -1,0 +1,32 @@
+body {
+    background-color: #333;
+}
+
+.main-container{
+    background-color: #ddd;
+    height: 100vh;
+}
+
+.page-form {
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #f8f9fa;
+}
+
+.page-content {
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #f8f9fa;
+    height: 35vh;
+}
+
+.alert-container {
+    margin-top: 10px;
+}
+
+.data-chart-line {
+    width: 100%;
+    height: 100%;
+}
