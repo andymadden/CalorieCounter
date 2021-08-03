@@ -19,7 +19,7 @@ body {
     padding-top: 10px;
     padding-bottom: 10px;
     background-color: #f8f9fa;
-    height: 35vh;
+    min-height: 35vh;
 }
 
 .alert-container {
