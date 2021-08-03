@@ -1,6 +1,6 @@
 {
   "db": {
-    "type": "sqlite"
+    "type": "sqlite",
     "file": "data.sqlite3"
   }
 }
