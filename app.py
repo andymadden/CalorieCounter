@@ -3,10 +3,11 @@ import json
 import sqlite3
 import pandas as pd
 from datetime import datetime, date
+from config import CONFIG
 
 app = Flask(__name__)
 
-conn = sqlite3.connect("data.sqlite3")
+conn = sqlite3.connect(CONFIG['db']['file'])
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS meals (timestamp datetime, name text, calories int);")
 c.execute("CREATE TABLE IF NOT EXISTS weights (timestamp datetime, weight int);")
@@ -27,6 +28,10 @@ def css(file):
 @app.route("/js/<file>")
 def js(file):
     return Response(open(f"js/{file}").read(), content_type="text/javascript")
+
+@app.route("/favicon.svg")
+def favicon():
+    return Response(open("favicon.svg").read(), content_type="image/svg+xml")
 
 @app.route("/api/meal", methods=['POST'])
 def addMeal():

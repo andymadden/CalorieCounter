@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import random
 from datetime import datetime, timedelta
+from config import CONFIG
 
 #%%
 
@@ -50,7 +51,7 @@ def load_data(row, cursor):
     return True
 
 #%% Connect to Sqlite
-conn = sqlite3.connect("data.sqlite3")
+conn = sqlite3.connect(CONFIG['db']['file'])
 
 c = conn.cursor()
 
