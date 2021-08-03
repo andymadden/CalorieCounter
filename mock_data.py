@@ -1,87 +1,65 @@
+#%%
 import sqlite3
-from datetime import datetime
+import pandas as pd
+import random
+from datetime import datetime, timedelta
 
-data_weight = [{
-    'timestamp': '2021-07-01',
-    'weight': 167
-}, {
-    'timestamp': '2021-07-02',
-    'weight': 169
-}, {
-    'timestamp': '2021-07-03',
-    'weight': 166
-}, {
-    'timestamp': '2021-07-04',
-    'weight': 167
-}, {
-    'timestamp': '2021-07-05',
-    'weight': 165
-}, {
-    'timestamp': '2021-07-06',
-    'weight': 164
-}, {
-    'timestamp': '2021-07-07',
-    'weight': 164
-}, {
-    'timestamp': '2021-07-08',
-    'weight': 162
-}, {
-    'timestamp': '2021-07-09',
-    'weight': 161
-}, {
-    'timestamp': '2021-07-10',
-    'weight': 160
-}, {
-    'timestamp': '2021-07-11',
-    'weight': 160
-}]
+#%%
 
-data_meal = [{
-    'timestamp': '2021-07-01',
-    'calories': 2100
-}, {
-    'timestamp': '2021-07-02',
-    'calories': 2110
-}, {
-    'timestamp': '2021-07-03',
-    'calories': 2140
-}, {
-    'timestamp': '2021-07-04',
-    'calories': 2120
-}, {
-    'timestamp': '2021-07-05',
-    'calories': 1900
-}, {
-    'timestamp': '2021-07-06',
-    'calories': 1950
-}, {
-    'timestamp': '2021-07-07',
-    'calories': 1900
-}, {
-    'timestamp': '2021-07-08',
-    'calories': 1500
-}, {
-    'timestamp': '2021-07-09',
-    'calories': 1800
-}, {
-    'timestamp': '2021-07-10',
-    'calories': 1820
-}, {
-    'timestamp': '2021-07-11',
-    'calories': 1830
-}]
+def generate_mock_data(days_in_past = 60, initial_weight = 200, initial_cal = 2100):
+    ''' Generate mock data for CalorieCounter 
+    '''
+
+    # Set the date range
+    today = datetime.today()
+    beginning = today - timedelta(days=days_in_past)
+    df_index = pd.date_range(start=beginning,
+                    end=datetime.today(), freq='D')
+
+    # Generate semi random data for weight and calories
+    weights = [initial_weight - weight*0.5 + random.randint(-5, 5) 
+                for weight in range(days_in_past + 1)]
+
+    cals = [initial_cal - cal*5 + random.randint(-200, 100) 
+                for cal in range(days_in_past+ 1)]
+
+    # put it all together into a dataframe
+    data = {'weight': weights, 'calories': cals}
+
+    df = (pd.DataFrame(index=df_index, data=data)
+            .reset_index()
+            .rename(columns={'index': 'timestamp'}))
+
+    df['timestamp'] = df['timestamp'].apply(pd.Timestamp.date).astype(str)
+
+    return df
+
+def load_data(row, cursor):
+    ''' Loads a row into the tables for CalorieCounter  
+    '''
+
+    cursor.execute(
+    "INSERT INTO meals (timestamp, name, calories) VALUES (?, ?, ?);",
+    (datetime.strptime(row['timestamp'], '%Y-%m-%d').isoformat(),
+        'SPAM', row['calories']))
+    cursor.execute(
+    "INSERT INTO weights (timestamp, weight) VALUES (?, ?);",
+    (datetime.strptime(row['timestamp'],
+                        '%Y-%m-%d').isoformat(), row['weight']))
+
+    return True
+
+#%% Connect to Sqlite
 conn = sqlite3.connect("data.sqlite3")
 
 c = conn.cursor()
 
-for data_weight, data_meal in zip(data_weight, data_meal):
-    c.execute(
-        "INSERT INTO meals (timestamp, name, calories) VALUES (?, ?, ?);",
-        (datetime.strptime(data_meal['timestamp'], '%Y-%m-%d').isoformat(),
-         'SPAM', data_meal['calories']))
-    c.execute(
-        "INSERT INTO weights (timestamp, weight) VALUES (?, ?);",
-        (datetime.strptime(data_weight['timestamp'],
-                           '%Y-%m-%d').isoformat(), data_weight['weight']))
+#%%
+
+mock_data = generate_mock_data()
+mock_data.apply(func = load_data, cursor=c, axis = 1)
+
+
+#%% Commit database
 
 conn.commit()
